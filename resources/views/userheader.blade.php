@@ -70,7 +70,7 @@
                     @if ($siteSettings->logo ?? null)
                         <img src="{{ asset($siteSettings->logo) }}" alt="{{ $siteSettings->store_name }}" style="height:42px;">
                     @else
-                        🎂 {{ $siteSettings->store_name ?? 'Sweet Bakes' }}
+                        🎂 {{ $siteSettings->store_name ?? 'Bakeon' }}
                     @endif
                 </a>
             </div>

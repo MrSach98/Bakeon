@@ -92,4 +92,9 @@ class Product extends Model
             ->orderBy('price')
             ->first();
     }
+    
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 }

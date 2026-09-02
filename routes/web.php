@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\OrderController;
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CategoryPageController;
 use App\Http\Controllers\ProductDetailController;
 use App\Http\Controllers\CartController;
@@ -33,7 +34,9 @@ use App\Http\Controllers\RazorpayWebhookController;
 
 
 Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
+Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
 Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::middleware('throttle:60,1')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/add-addon', [CartController::class, 'addAddon'])->name('cart.add-addon');

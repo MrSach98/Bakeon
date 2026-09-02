@@ -47,7 +47,7 @@ abstract class StorefrontController extends Controller
             ? (int) CartItem::where($cartOwner)->where('status', 'active')->sum('quantity')
             : 0;
 
-        $wishlistCount = count(session('wishlist', []));
+        $wishlistCount = auth()->check()? \App\Models\Wishlist::where('user_id', auth()->id())->count(): 0;
 
         View::share([
             'siteSettings' => $siteSettings,

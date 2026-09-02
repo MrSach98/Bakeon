@@ -30,9 +30,13 @@
                             </span>
                         @endif
 
+                        @php
+                            $isWishlisted = auth()->check() && $product->wishlists()->where('user_id', auth()->id())->exists();
+                        @endphp
+
                         <button type="button" class="btn btn-light rounded-circle position-absolute top-0 end-0 m-3 shadow-sm btn-wishlist-toggle"
                                 style="width:40px; height:40px;" data-product-id="{{ $product->id }}">
-                            <i class="fa-regular fa-heart"></i>
+                            <i class="fa-{{ $isWishlisted ? 'solid' : 'regular' }} fa-heart {{ $isWishlisted ? 'text-danger' : '' }}"></i>
                         </button>
 
                         <div id="zoomLens" class="zoom-lens"></div>
@@ -642,6 +646,50 @@ document.addEventListener('DOMContentLoaded', function () {
     const mobileAddToCartBtn = document.getElementById('mobileAddToCartBtn');
     if (addToCartBtn) addToCartBtn.addEventListener('click', submitAddToCart);
     if (mobileAddToCartBtn) mobileAddToCartBtn.addEventListener('click', submitAddToCart);
+    
+    // ------------------------------
+    // ✅ ADDED: Wishlist Toggle Code
+    // ------------------------------
+    const wishlistBtn = document.querySelector('.btn-wishlist-toggle');
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', function () {
+            const btn = this;
+            const productId = btn.dataset.productId;
+
+            fetch('{{ route("wishlist.toggle") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ product_id: productId }),
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(({ status, body }) => {
+                if (status === 401 && body.requires_login) {
+                    // Login modal kholo (jo header me already banaya hai)
+                    const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                    loginModal.show();
+                    return;
+                }
+
+                if (body.success) {
+                    const icon = btn.querySelector('i');
+                    if (body.added) {
+                        icon.classList.remove('fa-regular');
+                        icon.classList.add('fa-solid', 'text-danger');
+                    } else {
+                        icon.classList.remove('fa-solid', 'text-danger');
+                        icon.classList.add('fa-regular');
+                    }
+
+                    const wishlistCountEl = document.getElementById('wishlistCount');
+                    if (wishlistCountEl) wishlistCountEl.textContent = body.wishlist_count;
+                }
+            });
+        });
+    }
 });
 </script>
 
