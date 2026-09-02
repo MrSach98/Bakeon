@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\AdminReviewController;
+use App\Http\Controllers\ReviewController;
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
@@ -37,6 +39,8 @@ Route::get('/cart', [CartController::class, 'view'])->name('cart.view');
 Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
 Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+Route::get('/product/{productId}/reviewable-items', [ReviewController::class, 'reviewableItems'])->name('reviews.reviewable-items');
+Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 Route::middleware('throttle:60,1')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/add-addon', [CartController::class, 'addAddon'])->name('cart.add-addon');
@@ -177,6 +181,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::post('orders/{order}/update-notes', [OrderController::class, 'updateAdminNotes'])->name('orders.update-notes');
+
+        Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+        Route::get('reviews/data', [AdminReviewController::class, 'data'])->name('reviews.data');
+        Route::get('reviews/{review}', [AdminReviewController::class, 'show'])->name('reviews.show');
+        Route::post('reviews/{review}/update-status', [AdminReviewController::class, 'updateStatus'])->name('reviews.update-status');
     });
 
    

@@ -204,6 +204,12 @@
             </li>
 
             <li>
+                <a href="{{ route('admin.reviews.index') }}" class="nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+                    <i class="fa-regular fa-star"></i> Reviews
+                </a>
+            </li>
+
+            <li>
                 <a href="{{ route('admin.pincodes.index') }}" class="nav-link {{ request()->routeIs('admin.pincodes.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-location-dot"></i> Serviceable Pincodes
                 </a>

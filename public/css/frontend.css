@@ -585,16 +585,97 @@
     .serving-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f2f2f2; font-size: 0.85rem; }
 
     /* Carousels */
-    .product-carousel-wrap { position: relative; }
-    .related-scroll {
-        display: flex;
-        overflow-x: hidden;
-        gap: 16px;
-        scroll-behavior: smooth;
-    }
+ /* Product carousel – 5 per row on large screens */
+.product-carousel-wrap {
+    position: relative;
+}
+
+.related-scroll {
+    display: flex;
+    overflow-x: hidden;
+    gap: 16px;
+    scroll-behavior: smooth;
+    padding: 4px 0; /* tiny vertical padding for shadow visibility */
+}
+
+.related-card {
+    flex: 0 0 calc((100% - 4 * 16px) / 5); /* 5 items, 4 gaps */
+    transition: transform 0.2s;
+}
+
+/* Medium screens: 4 per row */
+@media (max-width: 1200px) {
     .related-card {
-        flex: 0 0 calc((100% - 5 * 16px) / 6);
+        flex: 0 0 calc((100% - 3 * 16px) / 4);
     }
+}
+
+/* Small screens: 2 per row */
+@media (max-width: 768px) {
+    .related-card {
+        flex: 0 0 calc((100% - 16px) / 2);
+    }
+}
+
+/* Carousel arrows */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.carousel-arrow:hover {
+    background: var(--brand-red);
+    color: #fff;
+    border-color: var(--brand-red);
+}
+.carousel-arrow-left { left: -18px; }
+.carousel-arrow-right { right: -18px; }
+
+/* Hide arrows when not needed */
+.carousel-arrow.hidden {
+    display: none;
+}
+
+/* Parent container ko flex container banayein taaki child stretch ho */
+.related-card {
+    display: flex;
+    flex-direction: column;
+    height: auto; /* ya default, but child height 100% lega */
+}
+
+/* Inner product card – pure parent width/height le */
+.related-card .product-card,
+.related-card > * {  /* Agar direct child div hai to */
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    /* Extra: agar card ke andar button niche chahiye to */
+}
+
+/* Agar product card ke andar image, title, price, button hai to unko flex grow de sakte hain */
+.related-card .product-card .card-body {
+    flex: 1 1 auto; /* body ko available space lene de */
+    display: flex;
+    flex-direction: column;
+}
+
+.related-card .product-card .card-footer,
+.related-card .product-card .add-to-cart-btn {
+    margin-top: auto; /* button ko hamesha bottom pe push karega */
+}
     @media (max-width: 1200px) {
         .related-card { flex: 0 0 calc((100% - 3 * 16px) / 4); }
     }
@@ -654,5 +735,12 @@
         }
         body { padding-bottom: 70px; }
     }
+    .related-card > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
 /* Product Detail Page CSS End */
 

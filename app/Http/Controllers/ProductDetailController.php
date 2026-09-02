@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 
 class ProductDetailController extends StorefrontController
@@ -62,10 +63,27 @@ class ProductDetailController extends StorefrontController
             ->unique('id')
             ->sortBy('sort_order')
             ->values();
+        
+        $approvedReviews = $product->approvedReviews()->with(['user', 'images'])->latest()->get();
 
+        $avgRating = $approvedReviews->avg('rating');
+        $reviewCount = $approvedReviews->count();
+
+        // Kya current user is product ko review kar sakta hai (delivered order se)
+        $reviewableItems = [];
+        if (auth()->check()) {
+            $reviewableItems = OrderItem::where('product_id', $product->id)
+                ->whereHas('order', fn ($q) => $q->where('user_id', auth()->id())->where('status', 'delivered'))
+                ->whereDoesntHave('review')
+                ->get(['id', 'weight_label', 'quantity']);
+               // $reviewableItems = OrderItem::where('product_id', $product->id)
+             // ->whereHas('order', fn ($q) => $q->where('user_id', auth()->id())->where('status', 'delivered'))
+            // ->get(['id', 'weight_label', 'quantity']);
+        }    
         return view('product-detail', compact(
             'product', 'relatedProducts', 'recentlyViewed',
-            'variantsByWeight', 'defaultVariant', 'servingInfo'
+            'variantsByWeight', 'defaultVariant', 'servingInfo',
+            'approvedReviews', 'avgRating', 'reviewCount', 'reviewableItems'
         ));
     }
 }

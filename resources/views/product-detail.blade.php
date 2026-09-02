@@ -75,12 +75,26 @@
                 </div>
             @endif
 
-            <!-- Rating summary (static placeholder until Reviews module exists) -->
-            <div class="mb-2">
-                <span class="fw-semibold">4.8</span>
-                <span style="color:#ffb800;">★★★★★</span>
-                <span class="text-muted small">(Be the first to review)</span>
-            </div>
+            <!-- Rating summary -->
+            @if ($reviewCount > 0)
+                <div class="mb-2">
+                    <span class="fw-semibold">{{ number_format($avgRating, 1) }}</span>
+                    <span style="color:#ffb800;">
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= round($avgRating))
+                                ★
+                            @else
+                                ☆
+                            @endif
+                        @endfor
+                    </span>
+                    <span class="text-muted small">({{ $reviewCount }} {{ Str::plural('Review', $reviewCount) }})</span>
+                </div>
+            @else
+                <div class="mb-2">
+                    <span class="text-muted small">No reviews yet</span>
+                </div>
+            @endif
 
             <!-- Pricing Box -->
             <div class="d-flex align-items-baseline gap-2 mb-3">
@@ -263,31 +277,64 @@
         </div>
     </div>
 
-    <!-- Ratings & Reviews (static placeholder — Reviews module not built yet) -->
+    <!-- Ratings & Reviews -->
     <div class="row mt-5">
         <div class="col-12">
-            <h5 class="fw-bold text-dark mb-3">Ratings &amp; Reviews</h5>
-            <div class="d-flex align-items-center gap-2 mb-3">
-                <span class="fs-3 fw-bold">4.8/5</span>
-                <span style="color:#ffb800; font-size:1.2rem;">★★★★★</span>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0">Ratings & Reviews</h5>
+
+                @if ($reviewableItems->count())
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#writeReviewModal">
+                        <i class="fa-regular fa-pen-to-square me-1"></i> Write a Review
+                    </button>
+                @endif
             </div>
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <div class="review-card">
-                        <div style="color:#ffb800;">★★★★★</div>
-                        <p class="small mt-2 mb-2">"Loved the taste and freshness. Delivered right on time!"</p>
-                        <small class="text-muted fw-semibold">Sample Customer</small>
-                    </div>
+
+            @if ($reviewCount > 0)
+                <div class="d-flex align-items-center gap-2 mb-4">
+                    <span class="fs-3 fw-bold">{{ number_format($avgRating, 1) }}/5</span>
+                    <span style="color:#ffb800; font-size:1.2rem;">
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= round($avgRating)) ★ @else ☆ @endif
+                        @endfor
+                    </span>
+                    <span class="text-muted">({{ $reviewCount }} {{ Str::plural('review', $reviewCount) }})</span>
                 </div>
-                <div class="col-md-3">
-                    <div class="review-card">
-                        <div style="color:#ffb800;">★★★★★</div>
-                        <p class="small mt-2 mb-2">"Beautifully decorated, exactly like the photos."</p>
-                        <small class="text-muted fw-semibold">Sample Customer</small>
-                    </div>
+
+                <div class="row g-3">
+                    @foreach ($approvedReviews as $review)
+                        <div class="col-md-4">
+                            <div class="review-card">
+                                <div style="color:#ffb800;">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= $review->rating) ★ @else ☆ @endif
+                                    @endfor
+                                </div>
+                                @if ($review->title)
+                                    <div class="fw-semibold mt-1">{{ $review->title }}</div>
+                                @endif
+                                @if ($review->comment)
+                                    <p class="small mt-1 mb-2">{{ $review->comment }}</p>
+                                @endif
+
+                                @if ($review->images->count())
+                                    <div class="d-flex gap-2 mb-2">
+                                        @foreach ($review->images as $img)
+                                            <img src="{{ asset($img->image_path) }}" width="50" height="50" class="rounded" style="object-fit:cover; cursor:pointer;"
+                                                onclick="window.open('{{ asset($img->image_path) }}', '_blank')">
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <small class="text-muted fw-semibold">{{ $review->user->name }}</small>
+                                <small class="text-muted d-block">{{ $review->created_at->format('d M Y') }}</small>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-            </div>
-            <small class="text-muted d-block mt-2">* Sample reviews shown as placeholder — real customer reviews will appear here once available.</small>
+            @else
+                <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+            @endif
         </div>
     </div>
 
@@ -353,7 +400,56 @@
     </button>
 </div>
 
+<div class="modal fade" id="writeReviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Write a Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small">Which order is this for?</label>
+                    <select id="reviewOrderItemId" class="form-select">
+                        @foreach ($reviewableItems as $item)
+                            <option value="{{ $item->id }}">{{ $item->weight_label }} &times; {{ $item->quantity }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
+                <div class="mb-3">
+                    <label class="form-label small">Your Rating</label>
+                    <div id="starRatingInput" class="fs-3" style="cursor:pointer;">
+                        <span data-value="1">☆</span><span data-value="2">☆</span><span data-value="3">☆</span><span data-value="4">☆</span><span data-value="5">☆</span>
+                    </div>
+                    <input type="hidden" id="selectedRating" value="0">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small">Title (optional)</label>
+                    <input type="text" id="reviewTitle" class="form-control" maxlength="150">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small">Your Review (optional)</label>
+                    <textarea id="reviewComment" class="form-control" rows="3" maxlength="1000"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small">Add Photos (optional, up to 5)</label>
+                    <input type="file" id="reviewImages" class="form-control" accept="image/*" multiple>
+                    <div id="reviewImagePreview" class="d-flex gap-2 mt-2 flex-wrap"></div>
+                </div>
+
+                <div id="reviewErrorBox" class="text-danger small mb-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="submitReviewBtn">Submit Review</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -475,6 +571,105 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             updateTotalPrice();
         });
+    });
+    // Toggle arrow visibility for carousels
+document.querySelectorAll('.related-scroll').forEach(track => {
+    const wrapper = track.closest('.product-carousel-wrap');
+    if (!wrapper) return;
+    const leftArrow = wrapper.querySelector('.carousel-arrow-left');
+    const rightArrow = wrapper.querySelector('.carousel-arrow-right');
+
+    function checkOverflow() {
+        const hasOverflow = track.scrollWidth > track.clientWidth;
+        if (leftArrow) leftArrow.classList.toggle('hidden', !hasOverflow);
+        if (rightArrow) rightArrow.classList.toggle('hidden', !hasOverflow);
+    }
+
+    // Check on load and after each scroll/resize
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    track.addEventListener('scroll', checkOverflow);
+});
+
+    // Star rating click
+    document.querySelectorAll('#starRatingInput span').forEach(star => {
+        star.addEventListener('click', function () {
+            const value = parseInt(this.dataset.value, 10);
+            document.getElementById('selectedRating').value = value;
+
+            document.querySelectorAll('#starRatingInput span').forEach(s => {
+                s.textContent = parseInt(s.dataset.value, 10) <= value ? '★' : '☆';
+                s.style.color = parseInt(s.dataset.value, 10) <= value ? '#ffb800' : '#ccc';
+            });
+        });
+    });
+
+    // Image preview
+    document.getElementById('reviewImages')?.addEventListener('change', function (e) {
+        const previewContainer = document.getElementById('reviewImagePreview');
+        previewContainer.innerHTML = '';
+
+        Array.from(e.target.files).slice(0, 5).forEach(file => {
+            const url = URL.createObjectURL(file);
+            const img = document.createElement('img');
+            img.src = url;
+            img.width = 60;
+            img.height = 60;
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '6px';
+            previewContainer.appendChild(img);
+        });
+    });
+
+    // Submit review
+    document.getElementById('submitReviewBtn')?.addEventListener('click', function () {
+        const rating = document.getElementById('selectedRating').value;
+        const errorBox = document.getElementById('reviewErrorBox');
+
+        if (rating === '0') {
+            errorBox.textContent = 'Please select a star rating.';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('product_id', {{ $product->id }});
+        formData.append('order_item_id', document.getElementById('reviewOrderItemId').value);
+        formData.append('rating', rating);
+        formData.append('title', document.getElementById('reviewTitle').value);
+        formData.append('comment', document.getElementById('reviewComment').value);
+
+        const imageFiles = document.getElementById('reviewImages').files;
+        Array.from(imageFiles).forEach(file => formData.append('images[]', file));
+
+        const btn = this;
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        fetch('{{ route("reviews.store") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: formData,
+        })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.textContent = 'Submit Review';
+
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    errorBox.textContent = data.message;
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = 'Submit Review';
+                errorBox.textContent = 'Something went wrong.';
+            });
     });
 
     // ---------- Flavor selection ----------
