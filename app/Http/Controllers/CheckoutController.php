@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CartItem;
 use App\Models\DeliveryOption;
+use App\Models\Address; 
 use Illuminate\Http\Request;
 
 class CheckoutController extends StorefrontController
@@ -67,8 +68,11 @@ class CheckoutController extends StorefrontController
         $deliveryOptions = DeliveryOption::where('is_active', true)->orderBy('extra_charge')->get();
 
         $user = auth()->user();
+        $savedAddresses = auth()->check()
+            ? Address::where('user_id', auth()->id())->orderByDesc('is_default')->latest()->get()
+            : collect();
 
-        return view('checkout', compact('lineItems', 'subtotal', 'deliveryOptions', 'user'));
+        return view('checkout', compact('lineItems', 'subtotal', 'deliveryOptions', 'user', 'savedAddresses'));
     }
 
     private function cartOwnerQuery(Request $request): array

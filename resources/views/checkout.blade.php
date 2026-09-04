@@ -60,7 +60,42 @@
                     <div class="checkout-step-body" id="stepBody2">
                         <h6 class="fw-bold mb-1">Let us know where to deliver</h6>
                         <p class="small text-muted mb-3">A detailed address will help us deliver the parcel smoothly</p>
+                        <!-- Saved Addresses -->
+                        @if ($savedAddresses->count())
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold d-block">Choose a Saved Address</label>
+                                <div class="row g-2">
+                                    @foreach ($savedAddresses as $addr)
+                                        <div class="col-md-6">
+                                            <div class="saved-address-card border rounded-3 p-3 {{ $loop->first && $addr->is_default ? 'active' : '' }}"
+                                                data-address='@json($addr)'>
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <span class="badge bg-light text-dark border">{{ ucfirst($addr->address_type) }}</span>
+                                                    @if ($addr->is_default)
+                                                        <span class="badge bg-danger">Default</span>
+                                                    @endif
+                                                </div>
+                                                <div class="fw-semibold mt-2">{{ $addr->receiver_name }}</div>
+                                                <div class="small text-muted">{{ $addr->receiver_phone }}</div>
+                                                <div class="small text-muted mt-1">
+                                                    {{ $addr->address_line }}, {{ $addr->area_locality }}, {{ $addr->city }} - {{ $addr->pincode }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
 
+                                    <div class="col-md-6">
+                                        <div class="saved-address-card add-new-card border rounded-3 p-3 d-flex align-items-center justify-content-center text-center" id="addNewAddressCard">
+                                            <div>
+                                                <i class="fa-solid fa-plus fa-lg text-danger mb-2"></i>
+                                                <div class="small fw-semibold">Use a New Address</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                        @endif
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label small">Receiver Name</label>
@@ -99,6 +134,12 @@
                                     <button type="button" class="addr-type-btn" data-value="others">Others</button>
                                 </div>
                                 <input type="hidden" name="address_type" id="addressTypeInput" value="home">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input type="checkbox" name="save_this_address" id="saveThisAddressCheck" class="form-check-input" value="1">
+                                    <label class="form-check-label small" for="saveThisAddressCheck">Save this address for future orders</label>
+                                </div>
                             </div>
                         </div>
 
@@ -504,6 +545,49 @@ $(function () {
             }
         });
     }
+    // ---------- Saved Address selection ----------
+$('.saved-address-card:not(.add-new-card)').on('click', function () {
+    $('.saved-address-card').removeClass('active');
+    $(this).addClass('active');
+
+    const addr = $(this).data('address');
+
+    $('input[name="receiver_name"]').val(addr.receiver_name);
+    $('input[name="receiver_phone"]').val(addr.receiver_phone);
+    $('input[name="alternate_phone"]').val(addr.alternate_phone || '');
+    $('input[name="address_line"]').val(addr.address_line);
+    $('input[name="area_locality"]').val(addr.area_locality);
+    $('#checkoutPincode').val(addr.pincode);
+    $('#checkoutCity').val(addr.city);
+
+    $('.addr-type-btn').removeClass('active');
+    $('.addr-type-btn[data-value="' + addr.address_type + '"]').addClass('active');
+    $('#addressTypeInput').val(addr.address_type);
+
+    // Ye ek saved address hai, dobara save karne ki zaroorat nahi
+    $('#saveThisAddressCheck').prop('checked', false).closest('.col-12').hide();
+
+    // Pincode ko auto-verify bhi kar do
+    $('#checkoutPincode').trigger('blur');
+});
+
+$('#addNewAddressCard').on('click', function () {
+    $('.saved-address-card').removeClass('active');
+    $(this).addClass('active');
+
+    $('#addressFormFields input[type="text"], #addressFormFields input[type="tel"]').val('');
+    $('#checkoutPincode, #checkoutCity').val('');
+    $('.addr-type-btn').removeClass('active');
+    $('.addr-type-btn[data-value="home"]').addClass('active');
+    $('#addressTypeInput').val('home');
+
+    $('#saveThisAddressCheck').closest('.col-12').show();
+});
+
+// Agar sirf ek hi saved address hai aur wo default hai, to page load pe hi auto-select kar do
+@if ($savedAddresses->count() && $savedAddresses->first()->is_default)
+    $('.saved-address-card:not(.add-new-card)').first().trigger('click');
+@endif
 
     updateDeliveryCharge();
 });

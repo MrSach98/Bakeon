@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             CakeMasterDataSeeder::class,
             AddonSeeder::class,
             ProductSeeder::class,
+            PageSeeder::class,
         ]);
     }
 }

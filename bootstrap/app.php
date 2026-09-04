@@ -14,23 +14,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
-        ]);
-    })
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'customer.auth' => \App\Http\Middleware\EnsureCustomerIsLoggedIn::class,
         ]);
 
-   
         $middleware->redirectGuestsTo(function ($request) {
             if ($request->is('admin/*')) {
                 return route('admin.login');
             }
             return url('/');
         });
-    })
-    ->withMiddleware(function (Middleware $middleware) {
+
         $middleware->validateCsrfTokens(except: [
             'webhooks/razorpay',
         ]);

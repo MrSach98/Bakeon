@@ -283,11 +283,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold text-dark mb-0">Ratings & Reviews</h5>
 
-                @if ($reviewableItems->count())
-                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#writeReviewModal">
-                        <i class="fa-regular fa-pen-to-square me-1"></i> Write a Review
-                    </button>
-                @endif
+               
             </div>
 
             @if ($reviewCount > 0)

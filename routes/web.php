@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\AdminReviewController;
+use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\ReviewController;
 
 use App\Http\Controllers\HomeController;
@@ -29,6 +30,13 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderPlacementController;
 use App\Http\Controllers\RazorpayController;
 use App\Http\Controllers\RazorpayWebhookController;
+use App\Http\Controllers\TrackOrderController;
+use App\Http\Controllers\PageController;
+
+use App\Http\Controllers\Account\MyOrdersController;
+use App\Http\Controllers\Account\AddressController;
+use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\Account\MyReviewsController;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -40,6 +48,8 @@ Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.in
 Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::get('/product/{productId}/reviewable-items', [ReviewController::class, 'reviewableItems'])->name('reviews.reviewable-items');
+Route::get('/track-order', [TrackOrderController::class, 'show'])->name('track-order.show');
+Route::post('/track-order', [TrackOrderController::class, 'search'])->name('track-order.search');
 Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 Route::middleware('throttle:60,1')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
@@ -53,6 +63,21 @@ Route::middleware('customer.auth')->group(function () {
     Route::post('/checkout/apply-coupon', [OrderPlacementController::class, 'applyCoupon'])->name('checkout.apply-coupon');
     Route::post('/checkout/remove-coupon', [OrderPlacementController::class, 'removeCoupon'])->name('checkout.remove-coupon');
     Route::post('/checkout/place-order', [OrderPlacementController::class, 'place'])->name('checkout.place');
+});
+
+Route::middleware('customer.auth')->prefix('account')->name('account.')->group(function () {
+    Route::get('/orders', [MyOrdersController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [MyOrdersController::class, 'show'])->name('orders.show');
+
+    Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
+    Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::post('/addresses/{address}/set-default', [AddressController::class, 'setDefault'])->name('addresses.set-default');
+    Route::get('/reviews', [MyReviewsController::class, 'index'])->name('reviews.index');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
 });
 Route::get('/order-confirmation/{orderNumber}', [OrderPlacementController::class, 'confirmation'])->name('order.confirmation');
 Route::post('/webhooks/razorpay', [RazorpayWebhookController::class, 'handle'])->name('razorpay.webhook');
@@ -71,6 +96,7 @@ Route::post('/auth/logout', [CustomerAuthController::class, 'logout'])->name('au
 Route::post('/auth/logout', [CustomerAuthController::class, 'logout'])->name('auth.logout');
 Route::get('/{slug}', [CategoryPageController::class, 'show'])->name('category.show');
 Route::get('product/{slug}', [ProductDetailController::class, 'show'])->name('product.show');
+Route::get('/page/{slug}', [PageController::class, 'show'])->name('page.show');
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware('guest')->group(function () {
@@ -186,6 +212,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reviews/data', [AdminReviewController::class, 'data'])->name('reviews.data');
         Route::get('reviews/{review}', [AdminReviewController::class, 'show'])->name('reviews.show');
         Route::post('reviews/{review}/update-status', [AdminReviewController::class, 'updateStatus'])->name('reviews.update-status');
+
+        Route::get('pages', [AdminPageController::class, 'index'])->name('pages.index');
+        Route::get('pages/data', [AdminPageController::class, 'data'])->name('pages.data');
+        Route::get('pages/create', [AdminPageController::class, 'create'])->name('pages.create');
+        Route::post('pages', [AdminPageController::class, 'store'])->name('pages.store');
+        Route::get('pages/{page}/edit', [AdminPageController::class, 'edit'])->name('pages.edit');
+        Route::put('pages/{page}', [AdminPageController::class, 'update'])->name('pages.update');
+        Route::delete('pages/{page}', [AdminPageController::class, 'destroy'])->name('pages.destroy');
+        Route::post('pages/{page}/toggle-status', [AdminPageController::class, 'toggleStatus'])->name('pages.toggle-status');
     });
 
    

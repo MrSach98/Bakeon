@@ -408,6 +408,22 @@
         font-size: 0.8rem;
     }
     .trust-badge i { color: #d8232a; font-size: 1.6rem; }
+        .saved-address-card {
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fff;
+        height: 100%;
+    }
+    .saved-address-card:hover { border-color: #d8232a; }
+    .saved-address-card.active {
+        border-color: #d8232a;
+        background: #fff4f4;
+        box-shadow: 0 0 0 1px #d8232a;
+    }
+    .saved-address-card.add-new-card {
+        border-style: dashed;
+        min-height: 100px;
+    }
 /*Cart Css End*/
 
 /*category css start*/

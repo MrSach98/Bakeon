@@ -232,6 +232,11 @@
                     <i class="fa-solid fa-gear"></i> Site Settings
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.pages.index') }}" class="nav-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
+                    <i class="fa-regular fa-file-lines"></i> Content Pages
+                </a>
+            </li>
 
         </ul>
     </div>

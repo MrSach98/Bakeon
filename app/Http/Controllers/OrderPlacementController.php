@@ -9,10 +9,13 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductWeight;
 use App\Models\Addon;
+use App\Models\Address;
 use App\Models\ServiceablePincode;
 use App\Services\DeliveryChargeCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Mail\OrderConfirmationMail;
+use Illuminate\Support\Facades\Mail;
 
 class OrderPlacementController extends StorefrontController
 {
@@ -67,7 +70,7 @@ class OrderPlacementController extends StorefrontController
             'delivery_time_slot' => ['nullable', 'string', 'max:50'],
             'delivery_option_id' => ['required', 'integer', 'exists:delivery_options,id'],
             'cake_message' => ['nullable', 'string', 'max:250'],
-
+            'save_this_address' => ['nullable', 'boolean'],
             'payment_method' => ['required', 'in:cod,online'],
         ]);
 
@@ -278,9 +281,33 @@ class OrderPlacementController extends StorefrontController
             report($e);
             return back()->withErrors(['order' => 'Something went wrong. Please try again.'])->withInput();
         }
-
+        if ($request->boolean('save_this_address') && auth()->check()) {
+            \App\Models\Address::firstOrCreate(
+                [
+                    'user_id' => auth()->id(),
+                    'receiver_phone' => $validated['receiver_phone'],
+                    'address_line' => $validated['address_line'],
+                    'pincode' => $validated['pincode'],
+                ],
+                [
+                    'receiver_name' => $validated['receiver_name'],
+                    'alternate_phone' => $validated['alternate_phone'] ?? null,
+                    'area_locality' => $validated['area_locality'],
+                    'city' => $validated['city'],
+                    'address_type' => $validated['address_type'],
+                    'is_default' => ! \App\Models\Address::where('user_id', auth()->id())->exists(),
+                ]
+            );
+        }
         session()->forget(['applied_coupon_code', 'checkout_idempotency_key']);
-
+        
+        if ($order->customer_email) {
+            try {
+                Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
+            } catch (\Throwable $e) {
+                report($e); 
+            }
+        }
         return redirect('/order-confirmation/' . $order->order_number);
     }
 

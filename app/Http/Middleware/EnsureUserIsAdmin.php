@@ -12,9 +12,8 @@ class EnsureUserIsAdmin
     {
         if (! auth()->check() || ! auth()->user()->isAdmin()) {
             auth()->logout();
-            return redirect()->route('admin.login')->withErrors([
-                'email' => 'Aapke paas admin panel access nahi hai.',
-            ]);
+
+            return redirect()->route('admin.login')->with('error', 'Your session has expired. Please login again.');
         }
 
         return $next($request);
