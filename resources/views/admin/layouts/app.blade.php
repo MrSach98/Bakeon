@@ -237,6 +237,19 @@
                     <i class="fa-regular fa-file-lines"></i> Content Pages
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.newsletter.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-envelope"></i> Newsletter Subscribers
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.blogs.index') }}" class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-blog"></i> Blog Posts
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ route('admin.blogs.create') }}" class="dropdown-item">Add New</a></li>
+                </ul>
+            </li>
 
         </ul>
     </div>
@@ -298,6 +311,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.3.1/classic/ckeditor.js"></script>
+<script>
+function initCKEditor(elementId) {
+    if (!document.getElementById(elementId)) return;
+
+    ClassicEditor.create(document.getElementById(elementId), {
+        toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'insertTable', 'undo', 'redo'],
+    }).catch(error => console.error(error));
+}
+</script>
     <script>
         function showToast(message, type = 'success') {
             const toastEl = document.getElementById('appToast');

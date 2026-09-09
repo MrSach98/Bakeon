@@ -102,32 +102,75 @@
                 </div>
             </div>
             <div class="card mb-3">
-    <div class="card-header">Payment &amp; Delivery Settings</div>
-    <div class="card-body">
-        <div class="form-check form-switch mb-3">
-            <input type="checkbox" name="online_payment_enabled" class="form-check-input" value="1"
-                   {{ old('online_payment_enabled', $setting->online_payment_enabled) ? 'checked' : '' }}>
-            <label class="form-check-label fw-semibold">Enable Online Payment</label>
-            <div class="form-text">Jab off ho, customer sirf Cash on Delivery use kar payega.</div>
-        </div>
+                <div class="card-header">Payment &amp; Delivery Settings</div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input type="checkbox" name="online_payment_enabled" class="form-check-input" value="1"
+                            {{ old('online_payment_enabled', $setting->online_payment_enabled) ? 'checked' : '' }}>
+                        <label class="form-check-label fw-semibold">Enable Online Payment</label>
+                        <div class="form-text">Jab off ho, customer sirf Cash on Delivery use kar payega.</div>
+                    </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Free Delivery Threshold (₹)</label>
-                <input type="number" step="0.01" name="free_delivery_threshold" class="form-control"
-                       value="{{ old('free_delivery_threshold', $setting->free_delivery_threshold) }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Free Delivery Threshold (₹)</label>
+                            <input type="number" step="0.01" name="free_delivery_threshold" class="form-control"
+                                value="{{ old('free_delivery_threshold', $setting->free_delivery_threshold) }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Default Delivery Charge (₹)</label>
+                            <input type="number" step="0.01" name="default_delivery_charge" class="form-control"
+                                value="{{ old('default_delivery_charge', $setting->default_delivery_charge) }}">
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Default Delivery Charge (₹)</label>
-                <input type="number" step="0.01" name="default_delivery_charge" class="form-control"
-                       value="{{ old('default_delivery_charge', $setting->default_delivery_charge) }}">
+            <div class="card mb-3">
+                <div class="card-header">Ad Platform Product Feeds</div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input type="checkbox" name="feed_enabled" class="form-check-input" value="1"
+                            {{ old('feed_enabled', $setting->feed_enabled) ? 'checked' : '' }}>
+                        <label class="form-check-label fw-semibold">Enable Product Feeds</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Feed Currency</label>
+                        <input type="text" name="feed_currency" class="form-control" style="max-width:120px;" value="{{ old('feed_currency', $setting->feed_currency) }}">
+                    </div>
+
+                    <hr>
+
+                    <label class="form-label small fw-bold">Google Shopping / Google Ads Feed URL</label>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" readonly value="{{ url('/feed/google-shopping.xml?token=' . $setting->feed_token) }}" id="googleFeedUrl">
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyFeedUrl('googleFeedUrl')">Copy</button>
+                    </div>
+
+                    <label class="form-label small fw-bold">Facebook / Instagram Ads Catalog Feed URL</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" readonly value="{{ url('/feed/facebook-catalog.csv?token=' . $setting->feed_token) }}" id="fbFeedUrl">
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyFeedUrl('fbFeedUrl')">Copy</button>
+                    </div>
+
+                    <div class="form-text mt-2">
+                        Paste these URLs into Meta Commerce Manager (Facebook/Instagram) and Google Merchant Center as your data feed source. They auto-refresh with your live product catalog.
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</div>
 
             <button type="submit" class="btn btn-dark w-100">Save Settings</button>
         </div>
     </div>
 </form>
+@push('scripts')
+<script>
+    function copyFeedUrl(id) {
+        const input = document.getElementById(id);
+        input.select();
+        navigator.clipboard.writeText(input.value);
+        showToast('Feed URL copied!', 'success');
+    }
+</script>
+@endpush
 @endsection

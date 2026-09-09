@@ -101,6 +101,7 @@
                                     <div class="fw-bold">Hey {{ auth()->user()->name }}!</div>
                                     <small class="text-muted">{{ auth()->user()->email }}</small>
                                 </li>
+                                <li><a class="dropdown-item" href="{{ route('account.dashboard') }}"><i class="fa-solid fa-gauge me-2"></i> Dashboard</a></li>
                                 <li><a class="dropdown-item" href="{{ url('/account/orders') }}"><i class="fa-solid fa-box me-2"></i> My Orders</a></li>
                                 <li><a class="dropdown-item" href="{{ url('/wishlist') }}"><i class="fa-regular fa-heart me-2"></i> My Favourites</a></li>
                                 <li><a class="dropdown-item" href="{{ url('/account/addresses') }}"><i class="fa-solid fa-location-dot me-2"></i> Manage Address</a></li>

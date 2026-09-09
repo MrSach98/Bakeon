@@ -13,6 +13,11 @@
 
             <ul class="list-unstyled mb-0">
                 <li>
+                    <a href="{{ route('account.dashboard') }}" class="d-block py-2 text-decoration-none {{ request()->routeIs('account.dashboard') ? 'text-danger fw-bold' : 'text-dark' }}">
+                        <i class="fa-solid fa-gauge me-2"></i> Dashboard
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('account.orders.index') }}" class="d-block py-2 text-decoration-none {{ request()->routeIs('account.orders.*') ? 'text-danger fw-bold' : 'text-dark' }}">
                         <i class="fa-solid fa-box me-2"></i> My Orders
                     </a>

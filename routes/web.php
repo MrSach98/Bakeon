@@ -17,8 +17,11 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminPageController;
-use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\AdminBlogController;
 
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ProductFeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CategoryPageController;
@@ -32,11 +35,13 @@ use App\Http\Controllers\RazorpayController;
 use App\Http\Controllers\RazorpayWebhookController;
 use App\Http\Controllers\TrackOrderController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\BlogController;
 
 use App\Http\Controllers\Account\MyOrdersController;
 use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\MyReviewsController;
+use App\Http\Controllers\Account\DashboardController;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -66,6 +71,7 @@ Route::middleware('customer.auth')->group(function () {
 });
 
 Route::middleware('customer.auth')->prefix('account')->name('account.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/orders', [MyOrdersController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [MyOrdersController::class, 'show'])->name('orders.show');
 
@@ -91,7 +97,8 @@ Route::middleware(['throttle:20,1', 'customer.auth'])->group(function () {
     Route::post('/payment/razorpay/create-order', [RazorpayController::class, 'createOrder'])->name('razorpay.create-order');
     Route::post('/payment/razorpay/verify', [RazorpayController::class, 'verifyAndPlaceOrder'])->name('razorpay.verify');
 });
-
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::post('/auth/logout', [CustomerAuthController::class, 'logout'])->name('auth.logout');
 Route::post('/auth/logout', [CustomerAuthController::class, 'logout'])->name('auth.logout');
 Route::get('/{slug}', [CategoryPageController::class, 'show'])->name('category.show');
@@ -221,7 +228,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('pages/{page}', [AdminPageController::class, 'update'])->name('pages.update');
         Route::delete('pages/{page}', [AdminPageController::class, 'destroy'])->name('pages.destroy');
         Route::post('pages/{page}/toggle-status', [AdminPageController::class, 'toggleStatus'])->name('pages.toggle-status');
-    });
 
+        Route::get('newsletter', [NewsletterController::class, 'index'])->name('newsletter.index');
+        Route::get('newsletter/data', [NewsletterController::class, 'data'])->name('newsletter.data');
+        Route::get('newsletter/export', [NewsletterController::class, 'export'])->name('newsletter.export');
+        Route::delete('newsletter/{subscriber}', [NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+
+        Route::get('blogs', [AdminBlogController::class, 'index'])->name('blogs.index');
+        Route::get('blogs/data', [AdminBlogController::class, 'data'])->name('blogs.data');
+        Route::get('blogs/create', [AdminBlogController::class, 'create'])->name('blogs.create');
+        Route::post('blogs', [AdminBlogController::class, 'store'])->name('blogs.store');
+        Route::get('blogs/{blog}/edit', [AdminBlogController::class, 'edit'])->name('blogs.edit');
+        Route::put('blogs/{blog}', [AdminBlogController::class, 'update'])->name('blogs.update');
+        Route::delete('blogs/{blog}', [AdminBlogController::class, 'destroy'])->name('blogs.destroy');
+        Route::post('blogs/{blog}/toggle-status', [AdminBlogController::class, 'toggleStatus'])->name('blogs.toggle-status');
+    });
+    
    
 });
+Route::get('/feed/google-shopping.xml', [ProductFeedController::class, 'googleShopping'])->name('feed.google');
+Route::get('/feed/facebook-catalog.csv', [ProductFeedController::class, 'facebookCatalog'])->name('feed.facebook');
+

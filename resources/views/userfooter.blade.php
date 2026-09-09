@@ -21,6 +21,7 @@
 
             <div class="col-6 col-md-3">
                 <h6>Company</h6>
+                <a href="{{ url('/blog') }}">Blog</a>
                 <a href="{{ url('/about-us') }}">About Us</a>
                 <a href="{{ url('/contact-us') }}">Contact Us</a>
                 <a href="{{ url('/terms-and-conditions') }}">Terms &amp; Conditions</a>
